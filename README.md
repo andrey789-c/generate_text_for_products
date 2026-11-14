@@ -111,11 +111,13 @@ ollama pull qwen2.5:3b
 Создайте файл `api/.env`:
 
 ```dotenv
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/product_ai?schema=public"
+DATABASE_URL="postgresql://<DB_USER>:<DB_PASSWORD>@localhost:5432/<DB_NAME>?schema=public"
 OLLAMA_HOST="http://localhost:11434"
 OLLAMA_MODEL="qwen2.5:3b"
 PORT=4000
 ```
+
+> Значения в угловых скобках — плейсхолдеры. Подставьте собственные данные PostgreSQL и не коммитьте файл `.env`. Параметры подключения должны совпадать с настройками базы в `docker-compose.yml`.
 
 Примените миграции и сгенерируйте Prisma Client:
 
@@ -147,7 +149,7 @@ npm run dev
 
 | Переменная | Обязательна | Пример | Назначение |
 |---|:---:|---|---|
-| `DATABASE_URL` | да | `postgresql://postgres:postgres@localhost:5432/product_ai?schema=public` | Подключение к PostgreSQL |
+| `DATABASE_URL` | да | `postgresql://<user>:<password>@localhost:5432/<database>?schema=public` | Подключение к PostgreSQL; содержит секреты |
 | `OLLAMA_HOST` | да | `http://localhost:11434` | Адрес Ollama API |
 | `OLLAMA_MODEL` | да | `qwen2.5:3b` | Модель для генерации |
 | `PORT` | нет | `4000` | Порт API; без переменной используется `3000` |
