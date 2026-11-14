@@ -1,0 +1,96 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id             String   @id @default(uuid())
+  name           String
+  brand          String?
+  category       String?
+  features       String[]
+  targetAudience String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  generations Generation[]
+}
+
+model Generation {
+  id               String   @id @default(uuid())
+  productId        String?
+  description      String
+  shortDescription String?
+  seoTitle         String?
+  metaDescription  String?
+  keywords         String[] @default([])
+  tone             String   @default("professional")
+  language         String   @default("ru")
+  model            String
+  createdAt        DateTime @default(now())
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+enum BulkJobStatus {
+  pending
+  processing
+  completed
+  completed_with_errors
+  failed
+  cancelled
+}
+
+enum BulkJobRowStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+model BulkJob {
+  id               String        @id @default(uuid())
+  status           BulkJobStatus @default(pending)
+  originalFileName String
+  originalFormat   String
+  sourcePath       String
+  sheetName        String?
+  totalRows        Int           @default(0)
+  processedRows    Int           @default(0)
+  successfulRows   Int           @default(0)
+  failedRows       Int           @default(0)
+  settings         Json
+  mapping          Json
+  columns          Json
+  sheetNames       Json?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  completedAt      DateTime?
+
+  rows BulkJobRow[]
+
+  @@index([status, createdAt])
+}
+
+model BulkJobRow {
+  id         String           @id @default(uuid())
+  jobId      String
+  rowIndex   Int
+  inputData  Json
+  outputData Json?
+  status     BulkJobRowStatus @default(pending)
+  error      String?
+  attempts   Int              @default(0)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  job BulkJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, rowIndex])
+  @@index([jobId, status, rowIndex])
+}
